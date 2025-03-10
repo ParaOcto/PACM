@@ -29,7 +29,7 @@ class Orange_ghost:
         self.num2 = (WIDTH // 30)           # Cell width
         self.image = pygame.image.load('ghost_images/orange.png')
         self.image = pygame.transform.scale(self.image, (45, 45))
-        self.speed = 3  # Reduced speed for slower movement
+        self.speed = 3  # Reduced speed for slower movementg
         self.direction = random.choice(['up', 'down', 'left', 'right'])
         self.path = []  # Stores the path to follow
         self.move_delay = 30  # Delay between movements (frames)
