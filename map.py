@@ -39,6 +39,7 @@ class Ghost:
         self.count = 8
         self.target_x = 0
         self.target_y = 0
+
         self.move_counter = 0
         self.set_initial_position()
 
@@ -95,45 +96,6 @@ class Ghost:
                 # Di chuyển từng bước nhỏ hướng về target
                 self.x += (dx / distance) * self.speed
                 self.y += (dy / distance) * self.speed
-        
-    def calculate_path_to_player(self):
-        # Convert ghost and player positions to grid coordinates
-        ghost_grid_x = int((self.x + 22) // self.num2)
-        ghost_grid_y = int((self.y + 22) // self.num1)
-        player_grid_x = int((player.x + 22) // self.num2)
-        player_grid_y = int((player.y + 22) // self.num1)
-
-        start_time = time.time() 
-        mem_before = psutil.Process().memory_info().rss / 1024
-        self.path = self.dfs((ghost_grid_x, ghost_grid_y), (player_grid_x, player_grid_y))
-        end_time = time.time() 
-        mem_after = float(psutil.Process().memory_info().rss) / 1024
-        self.time = end_time - start_time 
-        self.memory = mem_after - mem_before
-
-    def dfs(self, start, goal):
-        stack = [(start, [])]  # Mỗi phần tử là ((x, y), path)
-        visited = set()
-        self.expanded_nodes = 0  
-
-        while stack:
-            (x, y), path = stack.pop()
-            self.expanded_nodes += 1
-
-            if (x, y) == goal:
-                return path + [(x, y)]
-        
-            if (x, y) in visited:
-                continue
-            visited.add((x, y))
-
-            # Duyệt các ô lân cận: lên, xuống, trái, phải
-            for dx, dy in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
-                nx, ny = x + dx, y + dy
-                if 0 <= nx < len(level[0]) and 0 <= ny < len(level):
-                    if level[ny][nx] == 1 or level[ny][nx] == 2 or level[ny][nx] == 9 or level[ny][nx] == 10:  # Chỉ duyệt qua các ô hợp lệ
-                        stack.append(((nx, ny), path + [(x, y)]))
-        return []  # Không tìm thấy đường
 
     def draw_ghost(self):
         screen.blit(self.image, (self.x, self.y))
