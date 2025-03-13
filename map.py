@@ -33,7 +33,7 @@ class Ghost:
         self.num1 = ((HEIGHT - 50) // 32)  # Cell height
         self.num2 = (WIDTH // 30)           # Cell width
         self.image = pygame.transform.scale(pygame.image.load(image_path), (45, 45))
-        self.speed = speed
+        self.speed = 2
         self.path = []
         self.move_delay = 30
         self.move_counter = 0
@@ -62,6 +62,32 @@ class Ghost:
             self.move_counter = 0
         else:
             self.move_counter += self.speed
+
+    def teleport(self):
+        # Tìm một vị trí hợp lệ ngẫu nhiên trên bản đồ
+        valid_positions = []
+        for y in range(len(level)):
+            for x in range(len(level[0])):
+                # Chỉ thêm các ô đường đi hợp lệ
+                if level[y][x] in [1, 2, 9]:
+                    valid_positions.append((x, y))
+        
+        if valid_positions:
+            # Chọn ngẫu nhiên một vị trí
+            new_x, new_y = random.choice(valid_positions)
+            # Cập nhật vị trí
+            self.x = new_x * self.num2 + (0.5 * self.num2) - 22
+            self.y = new_y * self.num1 + (0.5 * self.num1) - 22
+            # Đặt lại đường đi
+            self.path = []
+            # Hiển thị hiệu ứng dịch chuyển (tuỳ chọn)
+            self.show_teleport_effect()
+
+    def show_teleport_effect(self):
+        # Hiệu ứng đơn giản khi dịch chuyển, vẽ một vòng tròn ở vị trí mới
+        pygame.draw.circle(screen, 'white', (self.x + 22, self.y + 22), 20, 2)
+        pygame.display.update()
+        pygame.time.delay(100)  # Dừng 100ms để hiệu ứng hiển thị rõ hơn
 
     def draw_ghost(self):
         screen.blit(self.image, (self.x, self.y))
@@ -167,12 +193,19 @@ class Orange_ghost(Ghost):
             if (x, y) in visited:
                 continue
             visited.add((x, y))
+            
+            move = [
+                (0, -1, 3), #up 
+                (0, 1, 1),  #down
+                (-1, 0, 2), #left
+                (1, 0, 2)   #right
+            ]
 
-            for dx, dy in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
+            for dx, dy, move_cost in move:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < len(level[0]) and 0 <= ny < len(level):
                     if level[ny][nx] == 1 or level[ny][nx] == 2 or level[ny][nx] == 10 or level[ny][nx] == 9:
-                        heapq.heappush(queue, (cost + 1, (nx, ny), path + [(x, y)]))
+                        heapq.heappush(queue, (cost + move_cost, (nx, ny), path + [(x, y)]))
 
         return []
 
@@ -275,6 +308,14 @@ def display_duration(duration):
     duration_text = font.render(f'Duration: {round(float(duration), 2)} seconds', True, 'white')
     screen.blit(duration_text, (10, 10))
 
+def check_ghost_collision(ghost1, ghost2):
+    ghost1_grid_x = int((ghost1.x + 22) // (WIDTH // 30))
+    ghost1_grid_y = int((ghost1.y + 22) // ((HEIGHT - 50) // 32))
+    ghost2_grid_x = int((ghost2.x + 22) // (WIDTH // 30))
+    ghost2_grid_y = int((ghost2.y + 22) // ((HEIGHT - 50) // 32))
+        
+    return (abs(ghost1_grid_x - ghost2_grid_x) < 2) and (abs(ghost1_grid_y - ghost2_grid_y) < 2) and level[ghost1_grid_y][ghost1_grid_x] in [1, 2, 9]
+
 # Initialize game objects
 player = Player()
 ghosts = [
@@ -319,6 +360,14 @@ while run:
         if check_collision(player, ghost):
             game_over = True
     
+# Trong vòng lặp chính của trò chơi, sau khi di chuyển tất cả các con ma
+# Kiểm tra va chạm giữa các con ma
+    for i in range(len(ghosts)):
+        for j in range(i + 1, len(ghosts)):
+            if check_ghost_collision(ghosts[i], ghosts[j]):
+                # Dịch chuyển con ma thứ hai
+                ghosts[j].teleport()
+        
     # Handle game events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
