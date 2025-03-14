@@ -21,9 +21,25 @@ level = boards
 counter = 0
 flicker = False
 
-player_images = []
+player_images_right = []
 for i in range(1, 5):
-    player_images.append(pygame.transform.scale(pygame.image.load(f'player_images/{i}.png'), (45, 45)))
+    player_images_right.append(pygame.transform.scale(pygame.image.load(f'player_images/{i}.png'), (45, 45)))
+
+player_images_left = []
+for i in range(1, 5):
+    img = pygame.transform.scale(pygame.image.load(f'player_images/{i}.png'), (45, 45))
+    player_images_left.append(pygame.transform.rotate(img, 180))
+
+
+player_images_up = []
+for i in range(1, 5):
+    img = pygame.transform.scale(pygame.image.load(f'player_images/{i}.png'), (45, 45))
+    player_images_up.append(pygame.transform.rotate(img, 90))
+
+player_images_down = []
+for i in range(1, 5):
+    img = pygame.transform.scale(pygame.image.load(f'player_images/{i}.png'), (45, 45))
+    player_images_down.append(pygame.transform.rotate(img, 270))
 
 def calculate_game_duration(start_time):
     return time.time() - start_time
@@ -97,8 +113,6 @@ class Ghost:
                 self.x += (dx / distance) * self.speed
                 self.y += (dy / distance) * self.speed
 
-    def draw_ghost(self):
-        screen.blit(self.image, (self.x, self.y))
 
     def teleport(self):
         # Tìm một vị trí hợp lệ ngẫu nhiên trên bản đồ
@@ -245,6 +259,58 @@ class Orange_ghost(Ghost):
                         heapq.heappush(queue, (cost + move_cost, (nx, ny), path + [(x, y)]))
 
         return []
+    
+class RedGhost(Ghost):
+    def __init__(self):
+        super().__init__('ghost_images/red.png', 3)  # Tốc độ có thể điều chỉnh
+
+    def calculate_path_to_player(self):
+        ghost_grid_x = int((self.x + 22) // self.num2)
+        ghost_grid_y = int((self.y + 22) // self.num1)
+        player_grid_x = int((player.x + 22) // self.num2)
+        player_grid_y = int((player.y + 22) // self.num1)
+        
+        self.path = self.a_star((ghost_grid_x, ghost_grid_y), (player_grid_x, player_grid_y))
+    
+    def heuristic(self, a, b):
+        # Sử dụng khoảng cách Manhattan làm heuristic
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    
+    def a_star(self, start, goal):
+        open_set = []
+        heapq.heappush(open_set, (0, start))
+        came_from = {}
+        g_score = {start: 0}
+        f_score = {start: self.heuristic(start, goal)}
+        
+        while open_set:
+            _, current = heapq.heappop(open_set)
+            
+            if current == goal:
+                path = []
+                while current in came_from:
+                    path.append(current)
+                    current = came_from[current]
+                path.reverse()
+                return path
+            
+            for dx, dy in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
+                neighbor = (current[0] + dx, current[1] + dy)
+                
+                if 0 <= neighbor[0] < len(level[0]) and 0 <= neighbor[1] < len(level):
+                    if level[neighbor[1]][neighbor[0]] not in [1, 2, 9, 10]:
+                        continue
+                    
+                    tentative_g_score = g_score[current] + 1
+                    
+                    if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                        came_from[neighbor] = current
+                        g_score[neighbor] = tentative_g_score
+                        f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal)
+                        heapq.heappush(open_set, (f_score[neighbor], neighbor))
+        
+        return []
+
 
 class Player:
     def __init__(self):
@@ -263,7 +329,14 @@ class Player:
                 break
         
     def draw_player(self):
-        screen.blit(player_images[counter // 5], (self.x, self.y))
+        if self.direction == 'right':
+        	screen.blit(player_images_right[counter // 5], (self.x, self.y))
+        elif self.direction == 'left':        
+            screen.blit(player_images_left[counter // 5], (self.x, self.y))
+        elif self.direction == 'up':        
+            screen.blit(player_images_up[counter // 5], (self.x, self.y))
+        elif self.direction == 'down':        
+            screen.blit(player_images_down[counter // 5], (self.x, self.y))
         
     def move(self):
         if self.direction == 'up':
@@ -332,7 +405,7 @@ def check_collision(player, ghost):
     ghost_grid_x = int((ghost.x + 22) // (WIDTH // 30))
     ghost_grid_y = int((ghost.y + 22) // ((HEIGHT - 50) // 32))
     
-    return (abs(player_grid_x - ghost_grid_x) < 1.5) and (abs(player_grid_y - ghost_grid_y) < 1.5)
+    return (abs(player_grid_x - ghost_grid_x) < 1) and (abs(player_grid_y - ghost_grid_y) < 1)
 
 def display_game_over():
     game_over_font = pygame.font.Font('freesansbold.ttf', 64)
@@ -351,14 +424,15 @@ def check_ghost_collision(ghost1, ghost2):
     ghost2_grid_x = int((ghost2.x + 22) // (WIDTH // 30))
     ghost2_grid_y = int((ghost2.y + 22) // ((HEIGHT - 50) // 32))
         
-    return (abs(ghost1_grid_x - ghost2_grid_x) < 2) and (abs(ghost1_grid_y - ghost2_grid_y) < 2) and level[ghost1_grid_y][ghost1_grid_x] in [1, 2, 9]
+    return (abs(ghost1_grid_x - ghost2_grid_x) < 1) and (abs(ghost1_grid_y - ghost2_grid_y) < 1) and level[ghost1_grid_y][ghost1_grid_x] in [1, 2, 9]
 
 # Initialize game objects
 player = Player()
 ghosts = [
     Pink_ghost(),
     Blue_ghost(),
-    Orange_ghost()
+    Orange_ghost(),
+    RedGhost()
 ]
 
 # Main game loop
