@@ -49,7 +49,7 @@ class Ghost:
         self.num1 = ((HEIGHT - 50) // 32)  # Cell height
         self.num2 = (WIDTH // 30)           # Cell width
         self.image = pygame.transform.scale(pygame.image.load(image_path), (45, 45))
-        self.speed = 2
+        self.speed = 3
         self.path = []
         self.move_delay = 30
         self.count = 8
@@ -131,6 +131,7 @@ class Ghost:
             self.y = new_y * self.num1 + (0.5 * self.num1) - 22
             # Đặt lại đường đi
             self.path = []
+            self.count = 8
             # Hiển thị hiệu ứng dịch chuyển (tuỳ chọn)
             self.show_teleport_effect()
 
@@ -405,7 +406,7 @@ def check_collision(player, ghost):
     ghost_grid_x = int((ghost.x + 22) // (WIDTH // 30))
     ghost_grid_y = int((ghost.y + 22) // ((HEIGHT - 50) // 32))
     
-    return (abs(player_grid_x - ghost_grid_x) < 1) and (abs(player_grid_y - ghost_grid_y) < 1)
+    return (abs(player_grid_x - ghost_grid_x) < 1.5) and (abs(player_grid_y - ghost_grid_y) < 1.5)
 
 def display_game_over():
     game_over_font = pygame.font.Font('freesansbold.ttf', 64)
