@@ -1,21 +1,44 @@
-HOW TO RUN SOURCE CODE: PAC-MAN game
+HOW TO RUN THE SOURCE CODE: PAC-MAN GAME
+RUNNING WITH VISUAL STUDIO CODE
+Step 1: Install Visual Studio Code
 
-RUN BY USING VISUAL STUDIO CODE:
-Step 1: You must install "visual studio code". You can follow this link: https://code.visualstudio.com/download
+You must install Visual Studio Code. You can follow this link: https://code.visualstudio.com/download
+Step 2: Install Python
 
-Step 2: 
-Install python environment into your computer if your OS is Window. You can follow this link: https://www.python.org/downloads/
-If your OS is Linux: 
-Open "Command prompt" and type these line:
-- sudo apt update
-- sudo apt install python3
+    For Windows: Download and install Python from https://www.python.org/downloads/.
+    For Linux: Open the Terminal and run the following commands:
 
-Step 3: In "visual studio code", find python extension and install it.
-Step 4: In your computer, open "Command prompt" then type this command line: "pip install pygame" in WINDOW or "pip3 install pygame" in LINUX to allow pygame to be imported.
-Step 5: After unzip our project, our project's folder was named: 23127049_23127427_23127451
+    sudo apt update
+    sudo apt install python3
 
-	In Visual Studio Code, on the toolbar in the top left corner, click to "File" then find "Open folder", after click to the folder "Source" and open this.
+Step 3: Install the Python Extension in Visual Studio Code
 
-Step 6: After all, click to file named "main.py" then open a new terminal then follow one of these line to run code:
-    "py main.py" in WINDOW
-    "python3 main.py" in LINUX
+In Visual Studio Code, search for the Python extension in the Extensions Marketplace and install it.
+Step 4: Install Pygame
+
+Open the Command Prompt (Windows) or Terminal (Linux), then run the following command:
+
+    For Windows:
+
+pip install pygame
+
+For Linux:
+
+    pip3 install pygame
+
+Step 5: Open the Project in Visual Studio Code
+
+After unzipping the project, the project folder will be named: 23127049_23127427_23127451.
+
+In Visual Studio Code, click File → Open Folder, then navigate to the Source folder and open it.
+Step 6: Run the Program
+
+After opening the folder, locate and open main.py. Then, open a new terminal and run one of the following commands:
+
+    For Windows:
+
+py main.py
+
+For Linux:
+
+python3 main.py
